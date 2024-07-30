@@ -1,0 +1,83 @@
+-- Script para subir a torre com controle de ativação via GUI (Mobile) com desvio de plataforma
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local jumpHeight = 30 -- Ajuste da altura do pulo
+local jumpDistance = 10 -- Distância horizontal do pulo para desviar
+local jumpEnabled = false -- Variável para controle do pulo
+
+-- Função para detectar se o jogador está no chão
+local function isGrounded()
+    local rayOrigin = character.HumanoidRootPart.Position
+    local rayDirection = Vector3.new(0, -1, 0) * 3 -- Comprimento do raio para detectar o chão
+    local ray = Ray.new(rayOrigin, rayDirection)
+
+    local hit, position = workspace:FindPartOnRay(ray, character)
+
+    return hit ~= nil
+end
+
+-- Função para detectar plataformas acima
+local function detectPlatformAbove()
+    local rayOrigin = character.HumanoidRootPart.Position
+    local rayDirection = Vector3.new(0, 1, 0) * 4 -- Raio para cima
+    local ray = Ray.new(rayOrigin, rayDirection)
+
+    local hit, position = workspace:FindPartOnRay(ray, character)
+
+    return hit ~= nil
+end
+
+-- Função para pular e desviar para o próximo nível
+local function jumpToNextLevel()
+    if jumpEnabled and isGrounded() and not detectPlatformAbove() then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        
+        -- Calcular a posição de destino com desvio lateral
+        local currentPosition = character.HumanoidRootPart.Position
+        local targetPosition = currentPosition + Vector3.new(jumpDistance, jumpHeight, 0) -- Desvia para frente e sobe
+
+        -- Movimentar-se em direção à posição de destino
+        humanoid:MoveTo(targetPosition)
+
+        -- Ajustar a altura do pulo
+        humanoid.JumpPower = jumpHeight
+
+        -- Aguarda a aterrissagem para resetar o estado de pulo
+        humanoid:GetPropertyChangedSignal("FloorMaterial"):Wait()
+    end
+end
+
+-- Criando a GUI do botão
+local ScreenGui = Instance.new("ScreenGui")
+local JumpButton = Instance.new("TextButton")
+
+-- Propriedades do ScreenGui
+ScreenGui.Parent = game.CoreGui -- Adiciona a GUI na tela do jogador
+
+-- Propriedades do JumpButton
+JumpButton.Size = UDim2.new(0, 200, 0, 50) -- Tamanho do botão (200x50 pixels)
+JumpButton.Position = UDim2.new(0.5, -100, 0.8, 0) -- Centraliza o botão horizontalmente e posiciona 80% na vertical
+JumpButton.Text = "Ativar Pulo Automático"
+JumpButton.Parent = ScreenGui -- Adiciona o botão na GUI
+
+-- Função para alternar o pulo automático
+local function toggleJump()
+    jumpEnabled = not jumpEnabled
+    if jumpEnabled then
+        JumpButton.Text = "Desativar Pulo Automático"
+    else
+        JumpButton.Text = "Ativar Pulo Automático"
+    end
+end
+
+-- Conectar o evento de clique do botão à função toggleJump
+JumpButton.MouseButton1Click:Connect(toggleJump)
+
+-- Loop de execução para detectar plataformas e pular automaticamente
+runService.RenderStepped:Connect(function()
+    jumpToNextLevel()
+end)
