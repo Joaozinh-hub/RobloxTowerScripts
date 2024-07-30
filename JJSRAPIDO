@@ -1,0 +1,52 @@
+-- LocalScript dentro do ControlPanel
+
+-- Referências para objetos na interface
+local controlPanel = script.Parent
+local toggleButton = controlPanel:WaitForChild("ToggleButton")
+
+-- Variáveis de controle
+local isActive = false
+local counter = 1
+
+-- Função para gerar a lista de mensagens de "UM!" até "MIL!"
+local messages = {}
+for i = 1, 1000 do
+    table.insert(messages, tostring(i) .. "!")
+end
+
+-- Configuração do botão de ativar/desativar
+toggleButton.Text = "Ativar"
+toggleButton.Size = UDim2.new(0.3, 0, 0.1, 0)
+toggleButton.Position = UDim2.new(0.35, 0, 0.45, 0)
+
+-- Função para enviar mensagens
+local function sendMessages()
+    while isActive and counter <= #messages do
+        print(messages[counter]) -- Substitua por envio de mensagem no chat ou outro mecanismo
+        counter = counter + 1
+        wait(0.5) -- Tempo de espera entre mensagens, ajuste conforme necessário
+    end
+end
+
+-- Evento de clique do botão
+toggleButton.MouseButton1Click:Connect(function()
+    isActive = not isActive
+    if isActive then
+        toggleButton.Text = "Desativar"
+        counter = 1 -- Reinicia o contador quando ativado
+        sendMessages()
+    else
+        toggleButton.Text = "Ativar"
+    end
+end)
+
+-- Ajustes de interface para dispositivos móveis
+controlPanel.Size = UDim2.new(0.2, 0, 0.2, 0)
+controlPanel.Position = UDim2.new(0.4, 0, 0.4, 0)
+controlPanel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+controlPanel.BorderSizePixel = 1
+
+-- Ajustes para o botão
+toggleButton.TextScaled = true
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+toggleButton.BorderSizePixel = 1
