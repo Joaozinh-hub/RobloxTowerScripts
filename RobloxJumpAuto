@@ -1,0 +1,78 @@
+-- LocalScript dentro do ControlPanel
+
+-- Referências para objetos na interface
+local controlPanel = script.Parent
+local toggleButton = controlPanel:WaitForChild("ToggleButton")
+local jjsToggleButton = controlPanel:WaitForChild("JJSToggleButton")
+
+-- Variáveis de controle
+local isMessageActive = false
+local isJJSActive = false
+local counter = 1
+
+-- Função para gerar a lista de mensagens de "UM!" até "MIL!"
+local messages = {}
+for i = 1, 1000 do
+    table.insert(messages, tostring(i) .. "!")
+end
+
+-- Configuração do botão de ativar/desativar mensagens
+toggleButton.Text = "Ativar Mensagens"
+toggleButton.Size = UDim2.new(0.3, 0, 0.15, 0)
+toggleButton.Position = UDim2.new(0.1, 0, 0.15, 0)
+
+-- Configuração do botão de ativar/desativar JJS
+jjsToggleButton.Text = "Ativar JJS"
+jjsToggleButton.Size = UDim2.new(0.3, 0, 0.15, 0)
+jjsToggleButton.Position = UDim2.new(0.1, 0, 0.35, 0)
+
+-- Função para enviar mensagens
+local function sendMessages()
+    while isMessageActive and counter <= #messages do
+        print(messages[counter]) -- Substitua por envio de mensagem no chat ou outro mecanismo
+        counter = counter + 1
+        wait(0.1) -- Tempo de espera entre mensagens
+    end
+end
+
+-- Evento de clique do botão para mensagens
+toggleButton.MouseButton1Click:Connect(function()
+    isMessageActive = not isMessageActive
+    if isMessageActive then
+        toggleButton.Text = "Desativar Mensagens"
+        counter = 1 -- Reinicia o contador quando ativado
+        sendMessages()
+    else
+        toggleButton.Text = "Ativar Mensagens"
+    end
+end)
+
+-- Evento de clique do botão para JJS
+jjsToggleButton.MouseButton1Click:Connect(function()
+    isJJSActive = not isJJSActive
+    if isJJSActive then
+        jjsToggleButton.Text = "Desativar JJS"
+        print("JJS Ativado!") -- Ação ao ativar JJS, pode ser substituída por outra funcionalidade
+    else
+        jjsToggleButton.Text = "Ativar JJS"
+        print("JJS Desativado!") -- Ação ao desativar JJS
+    end
+end)
+
+-- Ajustes de interface para dispositivos móveis
+controlPanel.Size = UDim2.new(0.5, 0, 0.4, 0)
+controlPanel.Position = UDim2.new(0.25, 0, 0.3, 0)
+controlPanel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+controlPanel.BorderSizePixel = 2
+
+-- Ajustes para o botão de mensagens
+toggleButton.TextScaled = true
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+toggleButton.BorderSizePixel = 2
+toggleButton.AutoButtonColor = false
+
+-- Ajustes para o botão de JJS
+jjsToggleButton.TextScaled = true
+jjsToggleButton.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+jjsToggleButton.BorderSizePixel = 2
+jjsToggleButton.AutoButtonColor = false
