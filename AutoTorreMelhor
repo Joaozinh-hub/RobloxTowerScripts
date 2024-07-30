@@ -1,83 +1,78 @@
--- Script para subir a torre com controle de ativação via GUI (Mobile) com desvio de plataforma
+-- LocalScript dentro do ControlPanel
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local userInputService = game:GetService("UserInputService")
-local runService = game:GetService("RunService")
-local jumpHeight = 30 -- Ajuste da altura do pulo
-local jumpDistance = 10 -- Distância horizontal do pulo para desviar
-local jumpEnabled = false -- Variável para controle do pulo
+-- Referências para objetos na interface
+local controlPanel = script.Parent
+local toggleButton = controlPanel:WaitForChild("ToggleButton")
+local jjsToggleButton = controlPanel:WaitForChild("JJSToggleButton")
 
--- Função para detectar se o jogador está no chão
-local function isGrounded()
-    local rayOrigin = character.HumanoidRootPart.Position
-    local rayDirection = Vector3.new(0, -1, 0) * 3 -- Comprimento do raio para detectar o chão
-    local ray = Ray.new(rayOrigin, rayDirection)
+-- Variáveis de controle
+local isMessageActive = false
+local isJJSActive = false
+local counter = 1
 
-    local hit, position = workspace:FindPartOnRay(ray, character)
-
-    return hit ~= nil
+-- Função para gerar a lista de mensagens de "UM!" até "MIL!"
+local messages = {}
+for i = 1, 1000 do
+    table.insert(messages, tostring(i) .. "!")
 end
 
--- Função para detectar plataformas acima
-local function detectPlatformAbove()
-    local rayOrigin = character.HumanoidRootPart.Position
-    local rayDirection = Vector3.new(0, 1, 0) * 4 -- Raio para cima
-    local ray = Ray.new(rayOrigin, rayDirection)
+-- Configuração do botão de ativar/desativar mensagens
+toggleButton.Text = "Ativar Mensagens"
+toggleButton.Size = UDim2.new(0.3, 0, 0.15, 0)
+toggleButton.Position = UDim2.new(0.1, 0, 0.15, 0)
 
-    local hit, position = workspace:FindPartOnRay(ray, character)
+-- Configuração do botão de ativar/desativar JJS
+jjsToggleButton.Text = "Ativar JJS"
+jjsToggleButton.Size = UDim2.new(0.3, 0, 0.15, 0)
+jjsToggleButton.Position = UDim2.new(0.1, 0, 0.35, 0)
 
-    return hit ~= nil
-end
-
--- Função para pular e desviar para o próximo nível
-local function jumpToNextLevel()
-    if jumpEnabled and isGrounded() and not detectPlatformAbove() then
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        
-        -- Calcular a posição de destino com desvio lateral
-        local currentPosition = character.HumanoidRootPart.Position
-        local targetPosition = currentPosition + Vector3.new(jumpDistance, jumpHeight, 0) -- Desvia para frente e sobe
-
-        -- Movimentar-se em direção à posição de destino
-        humanoid:MoveTo(targetPosition)
-
-        -- Ajustar a altura do pulo
-        humanoid.JumpPower = jumpHeight
-
-        -- Aguarda a aterrissagem para resetar o estado de pulo
-        humanoid:GetPropertyChangedSignal("FloorMaterial"):Wait()
+-- Função para enviar mensagens
+local function sendMessages()
+    while isMessageActive and counter <= #messages do
+        print(messages[counter]) -- Substitua por envio de mensagem no chat ou outro mecanismo
+        counter = counter + 1
+        wait(0.1) -- Tempo de espera entre mensagens
     end
 end
 
--- Criando a GUI do botão
-local ScreenGui = Instance.new("ScreenGui")
-local JumpButton = Instance.new("TextButton")
-
--- Propriedades do ScreenGui
-ScreenGui.Parent = game.CoreGui -- Adiciona a GUI na tela do jogador
-
--- Propriedades do JumpButton
-JumpButton.Size = UDim2.new(0, 200, 0, 50) -- Tamanho do botão (200x50 pixels)
-JumpButton.Position = UDim2.new(0.5, -100, 0.8, 0) -- Centraliza o botão horizontalmente e posiciona 80% na vertical
-JumpButton.Text = "Ativar Pulo Automático"
-JumpButton.Parent = ScreenGui -- Adiciona o botão na GUI
-
--- Função para alternar o pulo automático
-local function toggleJump()
-    jumpEnabled = not jumpEnabled
-    if jumpEnabled then
-        JumpButton.Text = "Desativar Pulo Automático"
+-- Evento de clique do botão para mensagens
+toggleButton.MouseButton1Click:Connect(function()
+    isMessageActive = not isMessageActive
+    if isMessageActive then
+        toggleButton.Text = "Desativar Mensagens"
+        counter = 1 -- Reinicia o contador quando ativado
+        sendMessages()
     else
-        JumpButton.Text = "Ativar Pulo Automático"
+        toggleButton.Text = "Ativar Mensagens"
     end
-end
-
--- Conectar o evento de clique do botão à função toggleJump
-JumpButton.MouseButton1Click:Connect(toggleJump)
-
--- Loop de execução para detectar plataformas e pular automaticamente
-runService.RenderStepped:Connect(function()
-    jumpToNextLevel()
 end)
+
+-- Evento de clique do botão para JJS
+jjsToggleButton.MouseButton1Click:Connect(function()
+    isJJSActive = not isJJSActive
+    if isJJSActive then
+        jjsToggleButton.Text = "Desativar JJS"
+        print("JJS Ativado!") -- Ação ao ativar JJS, pode ser substituída por outra funcionalidade
+    else
+        jjsToggleButton.Text = "Ativar JJS"
+        print("JJS Desativado!") -- Ação ao desativar JJS
+    end
+end)
+
+-- Ajustes de interface para dispositivos móveis
+controlPanel.Size = UDim2.new(0.5, 0, 0.4, 0)
+controlPanel.Position = UDim2.new(0.25, 0, 0.3, 0)
+controlPanel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+controlPanel.BorderSizePixel = 2
+
+-- Ajustes para o botão de mensagens
+toggleButton.TextScaled = true
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+toggleButton.BorderSizePixel = 2
+toggleButton.AutoButtonColor = false
+
+-- Ajustes para o botão de JJS
+jjsToggleButton.TextScaled = true
+jjsToggleButton.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+jjsToggleButton.BorderSizePixel = 2
+jjsToggleButton.AutoButtonColor = false
